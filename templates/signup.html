@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        background-image: url('{{ url_for("static", filename="images/background3.jpg") }}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        font-family: 'Cal Sans', sans-serif;
+    }
+
+    .container {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        padding: 0 20px;
+    }
+
+    .left {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        max-width: 490px;
+        height: 600px;
+        background-color: #f8f2e6;
+        border-radius: 20px;
+        padding: 40px 20px;
+        position: relative;
+    }
+
+    .logo {
+        font-weight: 700;
+        font-size: 1.8rem;
+        color: #254117;
+        text-decoration: none;
+        margin-bottom: 24px;
+    }
+
+    .subtitle {
+        font-weight: 600;
+        font-size: 1.3rem;
+        color: #254117;
+        margin-bottom: 36px;
+    }
+
+    .toggle-container {
+        position: relative;
+        display: flex;
+        background-color: #cdcdcd;
+        border-radius: 17px;
+        padding: 4px;
+        width: 80%;
+        max-width: 300px;
+        margin-bottom: 40px;
+        user-select: none;
+    }
+
+    .toggle-link {
+        flex: 1;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 25px;
+        border-radius: 10px;
+        font-weight: bold;
+        color: #888;
+        font-family: 'Cal Sans', sans-serif;
+        position: relative;
+        z-index: 2;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .toggle-link.active {
+        color: #f8f2e6;
+    }
+
+    .toggle-highlight {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 50%;
+        height: 100%;
+        background-color: #254117;
+        border-radius: 20px;
+        transition: transform 0.3s ease-in-out;
+        z-index: 0;
+    }
+
+    .input-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+
+    .input-group {
+        position: relative;
+        margin-bottom: 30px;
+        width: 100%;
+        max-width: 350px;
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 10px 0;
+        background: transparent;
+        border: none;
+        border-bottom: 3px solid white;
+        color: black;
+        font-size: 16px;
+        outline: none;
+        font-weight: 500;
+    }
+
+    .input-group input:focus {
+        border-bottom: 3px solid #254117;
+    }
+
+    .input-group .icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #254117;
+        font-size: 18px;
+    }
+
+    .password-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        width: 100%;
+        max-width: 350px;
+        margin-bottom: 30px;
+    }
+
+    .input-group.half-width {
+        width: 100%;
+    }
+
+    .loginbutton {
+        width: 100%;
+        max-width: 350px;
+        background-color: #254117;
+        color: white;
+        padding: 12px;
+        border: none;
+        border-radius: 100px;
+        font-size: 16px;
+        cursor: pointer;
+        opacity: 0.9;
+        transition: 0.3s;
+    }
+
+    .loginbutton:hover {
+        opacity: 1;
+    }
+
+    /* Floating flash overlay */
+    .flash-overlay {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+    }
+
+    .flashes {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .flashes li {
+        padding: 15px 30px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        font-family: 'Cal Sans', sans-serif;
+        font-size: 1.1em;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .flashes li.success {
+        background-color: #5cb85c;
+        color: white;
+    }
+
+    .flashes li.danger {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .flashes li.info {
+        background-color: #17a2b8;
+        color: white;
+    }
+
+    .flashes li.warning {
+        background-color: #ffc107;
+        color: black;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<body style="opacity: 0; transition: opacity 0.5s ease;" onload="document.body.style.opacity='1'">
+
+    <!-- Floating Flash Overlay -->
+    <div class="flash-overlay">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <ul class="flashes">
+            {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="container">
+        <div class="left">
+            <div class="logo">Filmists.</div>
+            <div class="subtitle">Sign up</div>
+
+            <div class="toggle-container">
+                <a href="/login" class="toggle-link" data-index="0">Login</a>
+                <a href="/signup" class="toggle-link" data-index="1">Sign Up</a>
+                <div class="toggle-highlight"></div>
+            </div>
+
+            <form method="POST" action="/signup" class="input-container">
+                <div class="input-group">
+                    <i class="fas fa-user icon"></i>
+                    <input type="text" placeholder="Username" name="username" value="{{ username if username else '' }}" required>
+                </div>
+
+                <div class="input-group">
+                    <i class="fas fa-envelope icon"></i>
+                    <input type="email" placeholder="Email" name="email" value="{{ email if email else '' }}" required>
+                </div>
+
+                <div class="password-row">
+                    <div class="input-group half-width">
+                        <i class="fas fa-lock icon"></i>
+                        <input type="password" placeholder="Password" name="password" required>
+                    </div>
+                    <div class="input-group half-width">
+                        <i class="fas fa-lock icon"></i>
+                        <input type="password" placeholder="Confirm Password" name="confirm_password" required>
+                    </div>
+                </div>
+
+                <button class="loginbutton" type="submit">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const toggleLinks = document.querySelectorAll(".toggle-link");
+            const highlight = document.querySelector(".toggle-highlight");
+
+            const currentPath = window.location.pathname;
+
+            highlight.style.transition = "none";
+
+            if (currentPath.includes("/login")) {
+                highlight.style.transform = "translateX(0%)";
+                toggleLinks[0].classList.add("active");
+            } else if (currentPath.includes("/signup")) {
+                highlight.style.transform = "translateX(100%)";
+                toggleLinks[1].classList.add("active");
+            }
+
+            setTimeout(() => {
+                highlight.style.transition = "transform 0.3s ease";
+            }, 10);
+
+            toggleLinks.forEach((link, index) => {
+                link.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    highlight.style.transform = `translateX(${index * 100}%)`;
+                    setTimeout(() => {
+                        window.location.href = link.getAttribute("href");
+                    }, 300);
+                });
+            });
+
+            // Auto-dismiss flash after 2 seconds
+            setTimeout(function() {
+                const flash = document.querySelector('.flash-overlay');
+                if (flash) {
+                    flash.style.transition = 'opacity 0.5s';
+                    flash.style.opacity = 0;
+                    setTimeout(() => flash.remove(), 500);
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+{% endblock %}

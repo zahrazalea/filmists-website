@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<body class="min-h-screen bg-cover bg-center bg-no-repeat relative" style="background-image: url('/static/images/search-bg.jpg');">
+
+  <!-- Black overlay -->
+  <div class="absolute inset-0 bg-black bg-opacity-70 z-0"></div>
+
+  <!-- Search container -->
+  <div class="flex items-center justify-center min-h-screen z-10 relative">
+
+    <div class="text-center text-[#f8f2e6] w-full max-w-xl px-6">
+      
+      <h1 class="text-4xl font-bold mb-8">Search Movies</h1>
+
+      <div class="flex gap-3 justify-center mb-4">
+        <input 
+          type="text" 
+          id="searchInput"
+          placeholder="Enter movie title..." 
+          class="w-full px-6 py-4 rounded-full border-2 border-[#f8f2e6] bg-transparent text-[#f8f2e6] text-lg placeholder-[#f8f2e6] focus:outline-none focus:ring-2 focus:ring-[#f8f2e6] transition" 
+        />
+
+        <button 
+          id="searchButton"
+          class="px-8 py-4 bg-[#f8f2e6] text-[#254117] rounded-full font-semibold text-lg transition hover:bg-[#ddd]"
+        >
+          Search
+        </button>
+      </div>
+
+      <!-- Search Results -->
+      <div id="results" class="bg-[#254117] bg-opacity-90 border border-[#f8f2e6] rounded-2xl mt-2 shadow-lg hidden">
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const searchButton = document.getElementById('searchButton');
+    const searchInput = document.getElementById('searchInput');
+    const resultsContainer = document.getElementById('results');
+    const tmdbApiKey = 'd32e627249c8e914b19484ffe655f6d6';  
+
+    searchButton.addEventListener('click', () => {
+      const query = searchInput.value.trim();
+      if (query.length === 0) {
+        alert("Please enter a movie title.");
+        return;
+      }
+
+      fetch(`https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${encodeURIComponent(query)}`)
+        .then(res => res.json())
+        .then(data => {
+          const results = data.results.slice(0, 10);
+          resultsContainer.innerHTML = '';
+          
+          if (results.length === 0) {
+            resultsContainer.innerHTML = '<div class="px-4 py-4 text-center text-[#f8f2e6]">No results found.</div>';
+          } else {
+            results.forEach(movie => {
+              const div = document.createElement('div');
+              div.className = 'px-6 py-3 hover:bg-[#3a5636] cursor-pointer text-left text-[#f8f2e6] border-b border-[#3a5636]';
+              div.textContent = `${movie.title} (${movie.release_date ? movie.release_date.slice(0, 4) : 'N/A'})`;
+              div.addEventListener('click', () => {
+                window.location.href = `/review/${movie.id}`;  
+              });
+              resultsContainer.appendChild(div);
+            });
+          }
+          resultsContainer.classList.remove('hidden');
+        });
+    });
+  </script>
+
+</body>
+{% endblock %}
