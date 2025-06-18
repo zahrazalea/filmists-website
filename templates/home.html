@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block head %}
+
+  <style>
+    #player iframe {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+  </style>
+
+  <script>
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+  </script>
+
+{% endblock %}
+
+{% block content %}
+<body class="bg-[#f8f2e6] opacity-0 transition-opacity duration-700 relative">
+
+  <!-- Floating Flash Overlay -->
+<div class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 flash-overlay">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="space-y-4">
+    {% for category, message in messages %}
+      <div class="
+          px-6 py-3 rounded-lg shadow-lg text-center font-semibold text-lg transition flash-message
+          {% if category == 'success' %}
+            bg-green-500 text-white
+          {% elif category == 'danger' %}
+            bg-red-500 text-white
+          {% elif category == 'info' %}
+            bg-blue-500 text-white
+          {% elif category == 'warning' %}
+            bg-yellow-400 text-black
+          {% else %}
+            bg-gray-500 text-white
+          {% endif %}
+        ">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+</div>
+
+
+  <!-- Background Layer -->
+  <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+    <img id="bg-image" class="w-full h-full object-cover absolute z-[-2] opacity-80" />
+    <div id="player-container" class="absolute inset-0 hidden z-[-1]">
+      <div id="player" class="absolute top-1/2 left-1/2 w-[120vw] h-[120vh] -translate-x-1/2 -translate-y-1/2 scale-125"></div>
+    </div>
+  </div>
+
+  <!-- Page Content -->
+  <main id="page2" class="relative z-10 flex flex-col items-center justify-center min-h-screen opacity-0 transition-opacity duration-1000 pt-32">
+    <div class="space-y-8 text-center">
+      <a href="/reviews/1239655">
+        <h1 class="text-4xl font-bold text-[#f8f2e6] hover-trigger cursor-pointer" 
+            data-image="/static/images/friendship.webp" 
+            data-video-id="cmSPwZIZu6Y">
+            Friendship 
+            <span class="text-sm">2025</span>
+        </h1>
+      </a>
+
+      <a href="/reviews/1136867" class="block">
+        <h1 class="text-4xl font-bold text-[#f8f2e6] hover-trigger cursor-pointer" 
+            data-image="/static/images/materialist.webp" 
+            data-video-id="4A_kmjtsJ7c">
+            Materialists 
+            <span class="text-sm">2025</span>
+        </h1>
+      </a>
+
+      <a href="/reviews/760329" class="block">
+        <h1 class="text-4xl font-bold text-[#f8f2e6] hover-trigger cursor-pointer" 
+            data-image="/static/images/smashingmachine.webp" 
+            data-video-id="aRpnP3LZ99g">
+            The Smashing Machine 
+            <span class="text-sm">2025</span>
+        </h1>
+      </a>
+    </div>
+  </main>
+
+  <script>
+    let player, timeoutId;
+    const page2 = document.getElementById("page2");
+    const bgImage = document.getElementById('bg-image');
+    const playerContainer = document.getElementById('player-container');
+    const triggers = document.querySelectorAll('.hover-trigger');
+    const movieBackground = [
+      "/static/images/friendship.webp",
+      "/static/images/materialist.webp",
+      "/static/images/smashingmachine.webp"
+    ];
+    let currentBackgroundIndex = 0;
+
+    function rotateBackground() {
+      bgImage.src = movieBackground[currentBackgroundIndex];
+      currentBackgroundIndex = (currentBackgroundIndex + 1) % movieBackground.length;
+    }
+
+    bgImage.src = movieBackground[0];
+    setInterval(rotateBackground, 5000);
+
+    window.addEventListener("DOMContentLoaded", () => {
+      document.body.classList.replace("opacity-0", "opacity-100");
+      page2.classList.replace("opacity-0", "opacity-100");
+    });
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: '100%',
+        width: '100%',
+        videoId: 'dQw4w9WgXcQ',
+        playerVars: {
+          autoplay: 0,
+          mute: 1,
+          controls: 0,
+          modestbranding: 1,
+          showinfo: 0,
+          rel: 0
+        },
+        events: {
+          onReady: () => player.stopVideo()
+        }
+      });
+    }
+
+    triggers.forEach(trigger => {
+      trigger.addEventListener("mouseenter", () => {
+        const imageUrl = trigger.getAttribute("data-image");
+        const videoId = trigger.getAttribute("data-video-id");
+        if (videoId) {
+          playerContainer.classList.remove("hidden");
+          bgImage.classList.add("hidden");
+          player.loadVideoById({ videoId: videoId, startSeconds: 60 });
+          timeoutId = setTimeout(() => {
+            player.stopVideo();
+            playerContainer.classList.add("hidden");
+            bgImage.classList.remove("hidden");
+          }, 20000);
+        } else if (imageUrl) {
+          bgImage.src = imageUrl;
+          bgImage.classList.remove("hidden");
+          playerContainer.classList.add("hidden");
+        }
+      });
+
+      trigger.addEventListener("mouseleave", () => {
+        clearTimeout(timeoutId);
+        player.stopVideo();
+        playerContainer.classList.add("hidden");
+        bgImage.classList.remove("hidden");
+      });
+    });
+
+    // Flash auto-dismiss (2 seconds)
+    setTimeout(function() {
+      const flashes = document.querySelectorAll('.flash-message');
+      flashes.forEach(flash => {
+        flash.style.transition = 'opacity 0.5s';
+        flash.style.opacity = 0;
+        setTimeout(() => flash.remove(), 500);
+      });
+    }, 2000);
+  </script>
+</body>
+{% endblock %}
